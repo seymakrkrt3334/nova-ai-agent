@@ -1,5 +1,7 @@
 # NOVA — yerel kişisel asistan
 
+**Durum: devam ediyor.** Bu depo bitmiş bir sürüm değildir. Geliştirme sürmektedir; buradaki kod ve ekran görüntüleri gelinen noktayı gösterir.
+
 NOVA, bu bilgisayarda çalışan bir FastAPI servisi, Ollama modelleri ve yerel PostgreSQL hafızası kullanır. Ayrıntılı kilometre taşları `PLAN.md` içindedir.
 
 ## Arayüz
