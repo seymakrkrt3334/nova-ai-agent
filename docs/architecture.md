@@ -1,15 +1,15 @@
-# NOVA mimarisi
+# NOVA architecture
 
-Masaüstü Vite arayüzü, Electron paketi ve Expo mobil istemci `X-API-Key` ile yerel FastAPI servisine konuşur. Servis Ollama (`llama3.2` ve `nomic-embed-text`) ve yerel pgvector hafızasını kullanır. Gmail salt okunur OAuth kapsamıyla bağlanır. CORS `5173` ve `4173` yerel kaynaklarına izin verir. Electron statik dosyayı yalnız `127.0.0.1:4173` üzerinde sunar.
+The desktop Vite interface, the Electron package, and the Expo mobile client talk to the local FastAPI service with `X-API-Key`. The service uses Ollama (`llama3.2` and `nomic-embed-text`) and a local pgvector memory store. Gmail connects with a read-only OAuth scope. CORS allows the local origins on ports `5173` and `4173`. Electron serves static files only on `127.0.0.1:4173`.
 
-`/chat` isteği önce açık hafıza kaydını ve bekleyen takvim onayını ayırır. Diğer mesajlarda model, doğrulanmış katalogdan en fazla üç adım seçer: sohbet, hafıza, salt okunur Gmail, web, kişiler ve takvim önerisi. Gmail sorgusu serbest metin değildir. Araç çıktısı özete veri olarak gider, talimat olarak gitmez. Web adresleri özel ağlara ve meta veri uçlarına açılmaz.
+A `/chat` request first separates an explicit memory save from a pending calendar confirmation. For other messages the model chooses at most three steps from the validated catalog: chat, memory, read-only Gmail, web, contacts, and a calendar proposal. A Gmail query is not free text. Tool output goes to the summary as data, not as instructions. Web addresses are not opened on private networks or metadata endpoints.
 
-Gmail kapsamı `gmail.readonly` olarak kalır. Kişiler `contacts.readonly`, takvim okuma `calendar.readonly` kapsamını ayrı belirteç dosyasında bekler. Takvim yazma `calendar.events` kapsamı tanımlıdır fakat otomatik istenmez; değişiklik onay kodu olmadan servise gitmez. E-posta gönderme yoktur.
+The Gmail scope stays `gmail.readonly`. Contacts expect `contacts.readonly`, and calendar reads expect `calendar.readonly`, each in its own token file. The calendar write scope `calendar.events` is defined but is not requested automatically. A change does not reach the service without a confirmation code. There is no email sending.
 
-Ses kaydı yalnız bas-konuş eylemiyle başlar. Masaüstü 16 kHz WAV gönderir. Whisper.cpp çok dilli taban modeli CPU üzerinde çalışır. WAV dışı yük 415 döner. Telefonun m4a kaydı kabul edilmez. Seslendirme tarayıcının veya Expo Speech’in yerel motorundadır ve durdurulabilir. Windows'ta kurulu sesler İngilizcedir. Otomasyon satırları `automations` tablosundadır. Süresi gelen iş `awaiting_confirmation` olur; onay, istemi sohbete taşır ve aracı kendisi çalıştırmaz.
+Recording starts only from a push-to-talk action. The desktop sends 16 kHz WAV. Whisper.cpp runs the multilingual base model on the CPU. Phone M4A is converted locally with FFmpeg before recognition. Speech uses the browser engine or Expo Speech and can be stopped. Automation rows live in the `automations` table. A due job becomes `awaiting_confirmation`; approval moves the prompt into chat and does not run the tool by itself.
 
-Sosyal katman yalnız resmi Bot, WhatsApp Business Cloud ve Instagram Messaging API'lerini tanır. Gönderim onay ister. Kişisel gelen kutusu okunmaz.
+The social layer recognizes only the official Bot API, WhatsApp Business Cloud API, and Instagram Messaging API. Sending requires confirmation. A personal inbox is not read.
 
-Salt okunur otomasyon, oluşturma anındaki yetki ve kapsam eşleşirse zamanlayıcıda çalışır. Yazma işlemleri onayda kalır. Aynı zaman penceresi yeniden çalışmaz.
+A read-only automation runs on the scheduler only when the permission and scope matched at creation time. Writes stay on confirmation. The same time window does not run again.
 
-Üretim için servis yerel arabirimde kalır ve API anahtarı zorunludur. Telefon erişimi Tailscale gibi özel bir ağla sınırlıdır. PostgreSQL herkese açık yayınlanmaz.
+The interface language defaults to English. Each reply uses the language detected for that turn. Phone access is limited to a private network such as Tailscale. PostgreSQL is not published publicly.

@@ -85,7 +85,7 @@ function TypingDots() {
 export default function App() {
   const [config, setConfig] = useState<MobileConfig | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [lang, setLang] = useState<"tr" | "en">("tr");
+  const [lang, setLang] = useState<"tr" | "en">("en");
   const [screen, setScreen] = useState<Screen>("chat");
   const [menu, setMenu] = useState(false);
   const [messages, setMessages] = useState<Bubble[]>([]);

@@ -21,7 +21,7 @@ def ffmpeg_binary() -> Path | None:
 
 def convert_to_wav(payload: bytes, suffix: str) -> bytes:
     if suffix.lower() not in ALLOWED_SUFFIXES:
-        raise ValueError("Desteklenmeyen ses uzantısı.")
+        raise ValueError("Unsupported audio extension.")
     binary = ffmpeg_binary()
     if binary is None:
         raise AudioConvertError("ffmpeg-missing")

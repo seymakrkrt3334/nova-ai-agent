@@ -10,7 +10,7 @@ export class ApiError extends Error {
 }
 
 export async function request<T>(config: MobileConfig, path: string, init: RequestInit = {}): Promise<T> {
-  if (!config.apiKey) throw new ApiError("API anahtarı gerekli.");
+  if (!config.apiKey) throw new ApiError("An API key is required.");
   const headers = new Headers(init.headers);
   if (!headers.has("Content-Type") && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
   headers.set("X-API-Key", config.apiKey);
@@ -18,10 +18,10 @@ export async function request<T>(config: MobileConfig, path: string, init: Reque
   try {
     response = await fetch(`${config.apiUrl}${path}`, { ...init, headers });
   } catch {
-    throw new ApiError("Sunucuya ulaşılamadı. Tailscale açık mı ve adres doğru mu?");
+    throw new ApiError("The server could not be reached. Is Tailscale on, and is the address correct?");
   }
   if (response.status === 401 || response.status === 403) {
-    throw new ApiError("API anahtarı reddedildi.");
+    throw new ApiError("The API key was rejected.");
   }
   if (!response.ok) {
     let detail = `HTTP ${response.status}`;

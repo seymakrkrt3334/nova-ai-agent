@@ -33,7 +33,7 @@ def voice_ready() -> bool:
 def transcribe_locally(payload: bytes, command: str) -> str:
     tokens = shlex.split(command, posix=False)
     if not tokens:
-        raise ValueError("Geçersiz komut.")
+        raise ValueError("Invalid command.")
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as handle:
         handle.write(payload)
         path = handle.name
@@ -71,30 +71,30 @@ async def transcribe(request: Request):
     if provider != "whisper" or not command:
         raise HTTPException(
             status_code=409,
-            detail="Yerel konuşma tanıma kapalı. Bas-konuş için VOICE_STT_PROVIDER=whisper ve VOICE_STT_COMMAND tanımlayın.",
+            detail="Local speech recognition is off. Set VOICE_STT_PROVIDER=whisper and VOICE_STT_COMMAND for push-to-talk.",
         )
     media = request.headers.get("content-type", "audio/wav").split(";", 1)[0].strip().lower()
     if media not in WAV_TYPES and media not in CONVERTIBLE:
-        raise HTTPException(status_code=415, detail="Yerel tanıma WAV veya FFmpeg ile dönüştürülen M4A, MP3, OGG, AAC ve FLAC kabul eder.")
+        raise HTTPException(status_code=415, detail="Local recognition accepts WAV, or M4A, MP3, OGG, AAC, and FLAC converted with FFmpeg.")
     payload = await request.body()
     if not payload:
-        raise HTTPException(status_code=422, detail="Ses kaydı gerekli.")
+        raise HTTPException(status_code=422, detail="An audio recording is required.")
     if len(payload) > MAX_AUDIO_BYTES:
-        raise HTTPException(status_code=413, detail="Ses kaydı çok büyük.")
+        raise HTTPException(status_code=413, detail="The audio recording is too large.")
     if media in CONVERTIBLE:
         try:
             payload = convert_to_wav(payload, CONVERTIBLE[media])
         except AudioConvertError as exc:
-            logger.error("Ses dönüştürme başarısız: %s", exc.__class__.__name__)
-            detail = "Yerel FFmpeg bulunamadı." if str(exc) == "ffmpeg-missing" else "Ses kaydı dönüştürülemedi."
+            logger.error("Audio conversion failed: %s", exc.__class__.__name__)
+            detail = "Local FFmpeg was not found." if str(exc) == "ffmpeg-missing" else "The audio recording could not be converted."
             raise HTTPException(status_code=503, detail=detail) from None
     try:
         text = transcribe_locally(payload, command)
     except Exception as exc:
-        logger.error("Yerel konuşma tanıma başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Yerel konuşma tanıma tamamlanamadı.") from None
+        logger.error("Local speech recognition failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="Local speech recognition could not be completed.") from None
     if not text:
-        raise HTTPException(status_code=422, detail="Konuşma metne çevrilemedi.")
+        raise HTTPException(status_code=422, detail="Speech could not be transcribed.")
     from app.services.language import response_language
 
     return {"text": text, "language": response_language(text)}

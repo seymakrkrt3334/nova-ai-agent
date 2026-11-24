@@ -1,145 +1,142 @@
-# NOVA planı
+# NOVA plan
 
-Özel, yerel öncelikli kişisel asistan. Bu dosya kilometre taşlarını ve kabul kriterlerini tutar. Mevcut veritabanı hacimleri, OAuth izinleri ve gizli dosyalar bu planda değiştirilmez.
+A private, local-first personal assistant. This file holds the milestones and acceptance criteria. Existing database volumes, OAuth grants, and secret files are not changed by this plan.
 
-## Bu tur
+## This round
 
-Faz 1–12 kodu duruyor. Son test: `python -m pytest tests -q` → 54 passed. Gmail, Ollama, kişiler, takvim, web ve resmi sosyal gönderim testlerde sahtedir. Çok dilli Whisper taban modeli ve imzasız Windows paketi kuruldu. İngilizce örnek ses canlı çevrildi. OAuth tarayıcısı açılmadı. Veritabanı satırları silinmedi. Gmail kapsamı salt okunurdur.
+Phases 1–12 are in the tree. The project is still in progress. The last full test at the written checkpoint was `python -m pytest tests -q` → 54 passed. Gmail, Ollama, contacts, calendar, web, and official social sending are mocked in tests. The multilingual Whisper base model and the unsigned Windows package are installed. An English sample recording was transcribed live. The OAuth browser was not opened. Database rows were not deleted. The Gmail scope is read-only.
 
-## Faz 1 — Mevcut sistemi denetle ve güvenli biçimde düzelt
+## Phase 1 — Audit the current system and fix it safely
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- İçe aktarmalar, bağımlılıklar, şema ve uçlar gizli dosya içeriği okunmadan karşılaştırılır.
-- `requirements.txt` çalışan kodun kullandığı paketleri listeler; kullanılmayan uzak model paketleri listeden çıkar.
-- Ayarlar `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBED_MODEL`, `DATABASE_URL` ve `NOVA_API_KEY` adlarıyla tek yerden okunur. Ayar çıktısı gizli değer göstermez.
-- Gmail araması boş, aşırı uzun veya geçersiz limit ile dış servise gitmez. Hata cevabı ayrıntı sızdırmaz.
-- Hafıza vektörü 768 boyutlu sonlu sayılardan oluşur. Metin ve kategori sınırları şemayla uyumludur.
-- Şema dosyası yalnız `CREATE ... IF NOT EXISTS` içerir ve mevcut hacme uygulanmadan durur.
-- API anahtarı olmayan istekler `/health` ve `/chat` üzerinde reddedilir.
-- Testler gerçek Gmail, Ollama ve veritabanı yerine sahte hizmet kullanır.
+- Imports, dependencies, the schema, and endpoints are compared without reading secret file contents.
+- `requirements.txt` lists the packages the running code uses. Unused remote-model packages are removed from the list.
+- Settings are read in one place under the names `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBED_MODEL`, `DATABASE_URL`, and `NOVA_API_KEY`. Settings output does not show secret values.
+- A Gmail search with an empty, oversized, or invalid limit does not call the external service. Error responses do not leak detail.
+- A memory vector is 768 finite numbers. Text and category limits match the schema.
+- The schema file contains only `CREATE ... IF NOT EXISTS` and is not applied to the existing volume.
+- Requests without an API key are rejected on `/health` and `/chat`.
+- Tests use fakes instead of real Gmail, Ollama, and the database.
 
-## Faz 2 — Araç kaydı ve sınırlı yürütme
+## Phase 2 — Tool registry and bounded execution
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- İlk katalog `chat`, `gmail_search`, `memory_search` ve `memory_save` ile başladı. Gönderme aracı yok. Takvim yazma ancak sonraki fazdaki onay koduyla önerilir.
-- Model kararı JSON olarak doğrulanır. Bilinmeyen araç veya bozuk JSON sohbete düşer.
-- Gmail sorgusu serbest metin olarak kabul edilmez. Konum ve zaman aralığı kullanıcının ifadesinden kurulur; konu ve gönderen tırnak içinde kalır.
-- "Bugün gönderilmiş" isteği gelen kutusuna zorlanmaz.
-- Araç döngüsü en fazla 3 adımdır, ardından sonuç özetlenir.
-- Model, açık kayıt isteği olmadan hafızaya yazamaz. Açık kayıtta saklanan metin kullanıcının yazdığı metindir.
-- Yönlendirici, e-posta gövdesini görmez. Özet istemi araç çıktısını talimat değil veri kabul eder.
-- Model servisi yoksa cevap 503 olur ve iç hata metni istemciye dönmez.
+- The first catalog started with `chat`, `gmail_search`, `memory_search`, and `memory_save`. There is no send tool. Calendar writes are only proposed, and only with the confirmation code from a later phase.
+- The model decision is validated as JSON. An unknown tool or broken JSON falls back to chat.
+- A Gmail query is not accepted as free text. Location and time range are built from the user's wording. Subject and sender stay quoted.
+- A "sent today" request is not forced into the inbox.
+- The tool loop is at most 3 steps, then the result is summarized.
+- The model cannot write memory without an explicit save request. On an explicit save, the stored text is the text the user wrote.
+- The router does not see the email body. The summary prompt treats tool output as data, not as instructions.
+- If the model service is down, the response is 503 and the internal error text is not returned to the client.
 
-## Faz 3 — Kalıcı hafıza
+## Phase 3 — Durable memory
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Anlamsal arama mesafe eşiği ve kaynak bilgisi döndürür.
-- Sohbetler oturum kimliğiyle saklanır, listelenir ve silinebilir.
-- Kayıt düzenleme `updated_at` alanını günceller.
-- Kullanıcı hafızayı dışa aktarabilir ve kategorilere göre silebilir.
-- Dış içerik hafıza talimatı olarak çalıştırılmaz.
+- Semantic search returns a distance threshold and source information.
+- Conversations are stored, listed, and deleted by session id.
+- Editing a record updates `updated_at`.
+- The user can export memory and delete by category.
+- External content is not executed as a memory instruction.
 
-## Faz 4 — Gmail
+## Phase 4 — Gmail
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Sayfalama belirteci ile devam edilir.
-- Tam ileti yalnız açık istekte ve salt okunur kapsamla alınır.
-- Arama, özet ve yanıt taslağı üretilir.
-- Gönderme ayrı OAuth onayı ve kullanıcı onayı olmadan yoktur.
+- Pagination continues with a page token.
+- The full message is fetched only on an explicit request and only with the read-only scope.
+- Search, summary, and a reply draft are produced.
+- Sending does not exist without a separate OAuth grant and user confirmation.
 
-## Faz 5 — Kişiler ve Takvim
+## Phase 5 — Contacts and calendar
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- En dar Google kapsamları kullanılır.
-- Okuma ve taslak serbesttir. Oluşturma, değiştirme ve silme açık onay ister.
-- Kapsam değişikliği ayrıca onaylanmadan yapılmaz.
+- The narrowest Google scopes are used.
+- Reads and drafts are free. Create, update, and delete require explicit confirmation.
+- A scope change is not made without a separate approval.
 
-## Faz 6 — Web arama
+## Phase 6 — Web search
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Sağlayıcı ayarla seçilir ve anahtar repoya girmez.
-- Sonuçlar kaynak adresiyle döner.
-- Sayfa içeriği talimat olarak yürütülmez.
+- The provider is selected by a setting and the key is not committed.
+- Results return with a source URL.
+- Page content is not executed as instructions.
 
-## Faz 7 — Masaüstü sohbet arayüzü
+## Phase 7 — Desktop chat interface
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Koyu mor, dar ve geniş ekranda kullanılabilir sohbet.
-- Konuşmalar, hafıza, entegrasyonlar ve ayarlar aynı API anahtarıyla çalışır.
-- Arayüz gizli değerleri kalıcı olarak göstermez.
+- A dark purple chat that works on narrow and wide screens.
+- Conversations, memory, integrations, and settings use the same API key.
+- The interface does not persist secret values.
 
-## Faz 8 — Expo mobil uygulama
+## Phase 8 — Expo mobile app
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- API adresi yapılandırılır. Fiziksel cihazda `localhost` kullanılmaz.
-- API anahtarı güvenli depolamadadır.
-- Sohbet, hata ve boş durumlar uçtan uca denenir.
+- The API address is configurable. A physical device does not use `localhost`.
+- The API key is in secure storage.
+- Chat, error, and empty states are tried end to end.
 
-## Faz 9 — Yerel ses
+## Phase 9 — Local voice
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Metinden sese ve sesten metne yerel motorlarla, mümkün olan platformda çalışır.
-- Ses kaydı açık kullanıcı eylemiyle başlar.
+- Text-to-speech and speech-to-text run with local engines on the platforms that support them.
+- Recording starts from an explicit user action.
 
-## Faz 10 — Zamanlanmış işler
+## Phase 10 — Scheduled jobs
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- İşler listelenir, durdurulur ve silinir.
-- Dış yan etki içeren iş onay ister.
-- Çalışma kayıtları gizli içerik dökmez.
+- Jobs can be listed, paused, and deleted.
+- A job with an external side effect requires confirmation.
+- Run records do not dump secret content.
 
-## Faz 11 — WhatsApp ve Instagram
+## Phase 11 — WhatsApp and Instagram
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Yalnız resmi API'ler değerlendirilir.
-- Resmi olmayan istemci, oturum devralma veya platform kısıtını aşma uygulanmaz.
-- Desteklenmeyen yüzey dokümante edilip bırakılır.
+- Only official APIs are considered.
+- An unofficial client, session takeover, or a bypass of a platform restriction is not implemented.
+- An unsupported surface is documented and left alone.
 
-## Faz 12 — Test, kurulum ve dağıtım
+## Phase 12 — Tests, install, and distribution
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Sahte entegrasyonlarla otomatik testler tekrar çalıştırılabilir.
-- Kurulum betiği gizli dosya üretmez ve mevcut hacmi silmez.
-- Dağıtım notu servisi herkese açık bağlamayı önermez.
+- Automated tests with mocked integrations can be run again.
+- The install script does not create secret files and does not delete the existing volume.
+- The distribution note does not recommend binding the service publicly.
 
-## Faz 11 — Resmi sosyal yüzeyler
+## Phase 11 — Official social surfaces
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Yalnız Telegram Bot API, WhatsApp Business Cloud API ve Instagram Messaging API tanımlanır.
-- Kişisel hesaplar için resmi olmayan istemci yoktur.
-- Gönderim açık onay olmadan yapılmaz.
-- Platform kısıtları, hesap türü ve olası ücret belgede durur.
+- Only the Telegram Bot API, WhatsApp Business Cloud API, and Instagram Messaging API are defined.
+- There is no unofficial client for personal accounts.
+- Sending does not happen without explicit confirmation.
+- Platform limits, account type, and possible cost stay in the document.
 
-## Faz 12 — Günlük kullanım
+## Phase 12 — Daily use
 
-Kabul kriterleri:
+Acceptance criteria:
 
-- Arayüz, ses, otomasyon ve entegrasyon durumları aynı yerel API'ye bağlıdır.
-- Salt okunur otomasyon yalnız oluşturma sırasında verilen yetkiyle çalışır. Yazma işlemi ayrıca onay ister.
-- Başlatma betiği mevcut konteyneri yeniden oluşturmaz.
-- Gizli dosyalar rapora girmez.
+- The interface, voice, automation, and integration status all use the same local API.
+- A read-only automation runs only with the permission given at creation. A write needs a separate confirmation.
+- The start script does not recreate an existing container.
+- Secret files do not enter the report.
 
-## Bilinçli olarak ertelenenler
+## Consciously deferred
 
-- Docker hacimlerini yeniden oluşturmak.
-- OAuth tarayıcısını açmak veya kapsamı genişletmek.
-- E-posta, kişi, takvim veya sosyal ileti göndermek.
-- Türkçe Windows ses paketini kurmak.
-- Tailscale kurmak veya bir portu tailnet dışına açmak.
-- Android APK üretmek.
-- Sürekli mikrofon dinlemek.
-- FastAPI ya da PostgreSQL portunu herkese açmak.
-- Ücretli API açmak.
+- Recreating Docker volumes.
+- Opening the OAuth browser or widening a scope.
+- Sending email, contacts, calendar events, or social messages.
+- Listening to the microphone continuously.
+- Publishing the FastAPI or PostgreSQL port to everyone.
+- Enabling a paid API.

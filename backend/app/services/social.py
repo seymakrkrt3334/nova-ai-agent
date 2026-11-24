@@ -7,29 +7,29 @@ PLATFORM_FACTS = {
     "telegram": {
         "official_api": "Telegram Bot API",
         "personal_inbox": False,
-        "can_read": "Yalnızca bota gönderilen iletiler",
-        "can_send": "Açık onaydan sonra bota gelen sohbet",
-        "account": "BotFather ile oluşturulan bot",
-        "cost": "Bot API ücretsizdir. NOVA ücretli bir plan açmaz.",
-        "restriction": "Kişisel sohbetler ve resmi olmayan kullanıcı istemcileri desteklenmez.",
+        "can_read": "Only messages sent to the bot",
+        "can_send": "A chat that reached the bot, after explicit confirmation",
+        "account": "A bot created with BotFather",
+        "cost": "The Bot API is free. NOVA does not enable a paid plan.",
+        "restriction": "Personal chats and unofficial user clients are not supported.",
     },
     "whatsapp": {
         "official_api": "WhatsApp Business Cloud API",
         "personal_inbox": False,
-        "can_read": "Yalnızca işletme numarasına gelen resmi webhook olayları",
-        "can_send": "Açık onaydan sonra, 24 saatlik müşteri penceresinde",
-        "account": "Meta işletme hesabı ve kayıtlı telefon numarası",
-        "cost": "Meta konuşma ücretleri kullanıcı hesabına aittir. NOVA bunları açmaz.",
-        "restriction": "Kişisel WhatsApp hesabı bağlanmaz. NOVA genel internete port açmaz; webhook için özel tünel kullanıcının işidir.",
+        "can_read": "Only official webhook events sent to the business number",
+        "can_send": "Inside the 24-hour customer window, after explicit confirmation",
+        "account": "A Meta business account and a registered phone number",
+        "cost": "Meta conversation fees belong to the user's account. NOVA does not enable them.",
+        "restriction": "A personal WhatsApp account is not connected. NOVA does not open a public port; a private tunnel for the webhook is the user's choice.",
     },
     "instagram": {
         "official_api": "Instagram Messaging API",
         "personal_inbox": False,
-        "can_read": "Profesyonel hesaba gelen resmi mesaj olayları",
-        "can_send": "Açık onaydan sonra, platformun izin verdiği yanıt penceresinde",
-        "account": "Profesyonel Instagram hesabı ve bağlı Facebook sayfası",
-        "cost": "Mesajlaşma API'si Meta hesap koşullarına bağlıdır. NOVA reklam veya ücretli API açmaz.",
-        "restriction": "Kişisel hesap otomasyonu ve resmi olmayan istemciler yoktur.",
+        "can_read": "Official message events sent to the professional account",
+        "can_send": "Inside the reply window the platform allows, after explicit confirmation",
+        "account": "A professional Instagram account and a linked Facebook page",
+        "cost": "The messaging API follows Meta account terms. NOVA does not enable ads or a paid API.",
+        "restriction": "There is no personal-account automation and no unofficial client.",
     },
 }
 
@@ -41,7 +41,7 @@ def platform_catalog() -> list[dict]:
 def clean_chat_id(value: str) -> str:
     cleaned = str(value or "").strip()
     if not CHAT_ID_RE.fullmatch(cleaned):
-        raise ValueError("Geçersiz sohbet.")
+        raise ValueError("Invalid chat.")
     return cleaned
 
 

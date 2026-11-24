@@ -1,89 +1,87 @@
-# Elle test rehberi
+# Manual test guide
 
-Bu listeyi kendi bilgisayarınızda uygulayın. Özel e-posta, kişi, takvim, sohbet veya anahtar değerini Cursor sohbetine yapıştırmayın. Sonuç olarak yalnız durum kodu, ekran adı ve "oldu / olmadı" yazın.
+Run this list on your own computer. Do not paste a private email, contact, calendar entry, chat, or key into the Cursor chat. Report only a status code, a screen name, and whether it worked.
 
-## Yerel çekirdek
+## Local core
 
-- [ ] `START_NOVA.bat` API ve arayüzü açar. Anahtarsız `/health` 401 döner.
-- [ ] Ayarlara kendi anahtarınızı yazınca bağlantı durumu "Bağlı" olur.
-- [ ] Yeni konuşma açılır, bir cümle gönderilir, yanıt gelir, kenar çubukta görünür.
-- [ ] Aynı oturumu yeniden açınca geçmiş durur. Başka oturumda eski cümleler karışmaz.
-- [ ] "bunu hatırla:" ile kaydettiğiniz cümle, yeni oturumda sorulunca bulunur.
-- [ ] Anahtarı silip gönderince hata görünür ve özel içerik ağ günlüğüne düşmez.
+- [ ] `START_NOVA.bat` opens the API and the interface. `/health` without a key returns 401.
+- [ ] After you enter your own key in Settings, the connection status becomes "Connected".
+- [ ] A new conversation opens, a sentence is sent, a reply arrives, and it appears in the sidebar.
+- [ ] Reopening the same session keeps the history. An older sentence does not leak into another session.
+- [ ] A sentence saved with "remember this:" is found when asked in a new session.
+- [ ] Clearing the key and sending shows an error, and private content does not land in the network log.
 
-## Gmail, kişiler, takvim
+## Gmail, contacts, calendar
 
-- [ ] `python scripts/authorize_google.py gmail` tarayıcı açmadan adımları yazar.
-- [ ] Siz `--launch` çalıştırmadan Gmail ekranı 503 veya bağlı değil durumu gösterir.
-- [ ] Yetkiden sonra "bugün gelen" ve "dün gönderdiğim" ayrı sonuç verir. Tam metin yalnız düğmeyle açılır.
-- [ ] Kişiler ve takvim, kendi salt okunur yetkileri olmadan 403 verir.
-- [ ] Takvim değişikliği kodu görünür; kodu yazmadan kayıt oluşmaz.
+- [ ] `python scripts/authorize_google.py gmail` prints the steps without opening a browser.
+- [ ] Before you run `--launch`, the Gmail screen shows 503 or a not-connected state.
+- [ ] After the grant, "what arrived today" and "what I sent yesterday" return different results. Full text opens only from the button.
+- [ ] Contacts and calendar return 403 without their own read-only grants.
+- [ ] A calendar change shows a code. No record is created before you type the code.
 
-## Ses
+## Voice
 
-- [ ] Basılı tutunca mikrofon ister, bırakınca durur.
-- [ ] İptal, kaydı ve okumayı keser.
-- [ ] Masaüstünde basılı tutunca kısa bir Türkçe ve bir İngilizce cümle metne döner. İngilizce örnek dosya canlı çevrildi; kendi Türkçe kaydınız henüz doğrulanmadı.
-- [ ] Cevap okuma açıksa İngilizce ses duyulur. Türkçe Windows sesi kurulu değildir.
-- [ ] Telefon ses ekranı, m4a kaydının kabul edilmediğini yazar. Sohbetteki ses düğmesi cevabı okur.
+- [ ] Holding the button asks for the microphone and releasing it stops.
+- [ ] Cancel cuts the recording and playback.
+- [ ] On the desktop, a short Turkish sentence and a short English sentence become text. The English sample file was transcribed live.
+- [ ] When reply speech is on, the spoken language matches the reply.
+- [ ] The phone voice screen accepts an M4A recording after local conversion. The speech button reads the reply.
 
-## Otomasyon
+## Automation
 
-- [ ] Yetkisiz otomatik iş 422 alır.
-- [ ] Günlük Gmail özeti, takvim hatırlatması, brifing, web araştırması veya hatırlatma oluştururken kapsamı ve salt okunur erişimi açıkça seçersiniz.
-- [ ] Süre dolunca bildirim geçmişi oluşur. Aynı pencere ikinci kez yazılmaz.
-- [ ] Yetkiyi kaldırınca iş durur.
-- [ ] Hiçbir otomatik iş e-posta veya takvim yazmaz.
+- [ ] An unauthorized automatic job returns 422.
+- [ ] When you create a daily Gmail summary, calendar reminder, briefing, web research, or reminder, you explicitly choose the scope and read-only access.
+- [ ] When the time is due, a notification history row is created. The same window is not written twice.
+- [ ] Revoking permission stops the job.
+- [ ] No automatic job writes email or calendar.
 
-## Sosyal
+## Social
 
-- [ ] Platform kartları kişisel gelen kutusunun okunmadığını yazar.
-- [ ] Onay kutusu kapalıyken gönderim olmaz.
-- [ ] Telegram bot belirteci yokken gönderim 409 döner.
-- [ ] WhatsApp ve Instagram için işletme hesabı, ücret uyarısı ve genel webhook olmadığı görünür.
+- [ ] Platform cards say the personal inbox is not read.
+- [ ] Sending does not happen while the confirmation box is off.
+- [ ] Sending returns 409 when the Telegram bot token is missing.
+- [ ] WhatsApp and Instagram show the business-account requirement, the cost warning, and that there is no public webhook.
 
-## Google kişileri ve takvim
+## Google contacts and calendar
 
-Bu adımlar tarayıcı açar. NOVA bunları kendiliğinden çalıştırmaz. Ek OAuth izni vermeden önce kapsamın salt okunur olduğunu kontrol edin.
+These steps open a browser. NOVA does not run them by itself. Before you grant extra OAuth permission, check that the scope is read-only.
 
-1. `backend` klasöründe `..\.venv\Scripts\python.exe scripts\authorize_google.py contacts` komutunu çalıştırın. Tarayıcı açılmaz. People API satırını okuyun.
-2. Aynı komuta yalnız siz `--launch` eklerseniz tarayıcı açılır. Hesabınızı seçin. Belirteç `token_contacts.json` dosyasına yazılır. Dosyayı açmayın ve içeriğini sohbete yapıştırmayın.
-3. Takvim için aynı iki adımı `calendar` ile tekrarlayın. Belirteç `token_calendar.json` olur. Kapsam `calendar.readonly` kalmalıdır.
-4. Uygulamada Kişiler ve Takvim ekranlarını açın. Sonuç olarak yalnız “oldu / olmadı” yazın. İsim, telefon, etkinlik başlığı veya saat yapıştırmayın.
-5. Takvim değişikliği bir onay kodu göstermeden kaydolmamalıdır. Kodu yazmak yazma izni de ister. Bu izni ayrıca onaylamadan vermeyin.
+1. In the `backend` folder, run `..\.venv\Scripts\python.exe scripts\authorize_google.py contacts`. The browser does not open. Read the People API line.
+2. Only if you add `--launch` yourself does the browser open. Choose your account. The token is written to `token_contacts.json`. Do not open the file and do not paste its contents into chat.
+3. Repeat the same two steps with `calendar`. The token is `token_calendar.json`. The scope must stay `calendar.readonly`.
+4. Open the Contacts and Calendar screens in the app. Report only whether it worked. Do not paste a name, phone number, event title, or time.
+5. A calendar change must not save before it shows a confirmation code. Typing the code also requires write permission. Do not grant that permission without a separate approval.
 
-## Gmail canlı kontrol
+## Live Gmail check
 
-1. `..\.venv\Scripts\python.exe scripts\authorize_google.py gmail` tarayıcı açmadan adımları yazar.
-2. `--launch` yalnız sizin kararınızdır. Kapsam `gmail.readonly` olmalıdır. Belirteç `token.json` olur. İçeriğini paylaşmayın.
-3. Ayarlara kendi API anahtarınızı yazın. Anahtarı sohbete yazmayın.
-4. “bugün gelen” ve “dün gönderdiğim” için sohbete kısa istek yazın. Cursor'a yalnız durum kodunu ve “sonuç geldi / gelmedi” bilgisini iletin. Konu, gönderen ve gövde yapıştırmayın.
-5. Tam metin yalnız siz düğmeye basınca açılır. Gönderme yoktur.
+1. `..\.venv\Scripts\python.exe scripts\authorize_google.py gmail` prints the steps without opening a browser.
+2. `--launch` is only your decision. The scope must be `gmail.readonly`. The token is `token.json`. Do not share its contents.
+3. Enter your own API key in Settings. Do not write the key in chat.
+4. Send a short request for "what arrived today" and "what I sent yesterday". Tell Cursor only the status code and whether a result arrived. Do not paste the subject, sender, or body.
+5. Full text opens only when you press the button. There is no send.
 
-## Tailscale ile özel telefon erişimi
+## Private phone access with Tailscale
 
-Tailscale bu bilgisayarda kurulu değildir ve kurulmadı. Kurmaya karar verirseniz:
+1. Install the Tailscale client only with your own tailnet account. Do not bind PostgreSQL or Ollama to a public address.
+2. PostgreSQL stays on `127.0.0.1:5434`. Do not open ports `5432`, `5433`, or `5434` to the tailnet or the internet.
+3. The API may listen on port `8001` only when the firewall allows the Tailscale range `100.64.0.0/10`. Do not add a public allow rule.
+4. On the phone, enter that tailnet address and the API key in Expo settings. The key stays in SecureStore. Do not write the address or the key in chat.
+5. Send one chat from the phone. Report only whether it connected.
 
-1. Tailscale istemcisini yalnız kendi tailnet hesabınızla kurun. Servisi `0.0.0.0` adresine bağlamayın.
-2. PostgreSQL `127.0.0.1:5434` üzerinde kalır. `5432`, `5433` ve `5434` portlarını tailnet'e veya internete açmayın.
-3. FastAPI'yi herkese açmak yerine, tailnet içinde `tailscale serve` kullanın. Örnek niyet: yalnız tailnet'ten `https://<makine>.<tailnet>.ts.net` adresini `http://127.0.0.1:8001` hedefine bağlamak. Komutu çalıştırmadan önce hedefi kontrol edin.
-4. Telefonda Expo ayarlarına bu tailnet adresini ve API anahtarını yazın. Anahtar SecureStore'da kalır. Adresi ve anahtarı sohbete yazmayın.
-5. Telefondan bir sohbet gönderin. Sonuç olarak yalnız “bağlandı / bağlanmadı” yazın.
+## Android package
 
-## Android paketi
-
-APK üretilmedi. Java 17, platformlar `android-30`, `android-33`, `android-34`, `android-35` ve build-tools `34.0.0`, `35.0.1`, `36.0.0` duruyor. `adb.exe` SDK içindedir fakat PATH üzerinde değildir. `ANDROID_HOME` tanımsızdır. Sistem ortam değişkenini değiştirmek onay ister. Bir kabukta denemek için:
+A signed release APK is built with the local release keystore. That keystore is not in the repository. Java 17 and the Android SDK are required. `adb.exe` is inside the SDK. Trying a shell build:
 
 ```bat
 set ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk
 set PATH=%ANDROID_HOME%\platform-tools;%PATH%
-cd mobile
-npx expo start
+cd mobile\android
+gradlew.bat assembleRelease
 ```
 
-Bağlı bir cihaz veya emülatör yoksa paket oluşmaz. iOS için macOS ve Xcode gerekir.
+iOS needs macOS and Xcode.
 
-## Kapatma
+## Shutdown
 
-- [ ] `STOP_NOVA.bat` başlığı `NOVA API`, `NOVA UI` veya `NOVA AI` olan pencereleri kapatır.
-- [ ] `nova-vector-db` çalışmaya devam eder ve hacmi silinmez. Kayıt sayıları değişmez.
+- [ ] `STOP_NOVA.bat` closes windows titled `NOVA API`, `NOVA UI`, or `NOVA AI`.
+- [ ] `nova-vector-db` keeps running and its volume is not deleted. Record counts do not change.

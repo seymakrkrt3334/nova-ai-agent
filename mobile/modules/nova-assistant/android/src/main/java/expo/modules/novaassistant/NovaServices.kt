@@ -45,7 +45,7 @@ class NovaListenService : Service() {
         ensureChannel(this)
         val notification: Notification = NotificationCompat.Builder(this, "nova-listen")
             .setContentTitle("NOVA")
-            .setContentText("Dinleme açık. Ses kaydı yüklenmez.")
+            .setContentText("Listening is on. Audio is not uploaded.")
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOngoing(true)
             .build()

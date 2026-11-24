@@ -177,4 +177,4 @@ def test_automation_approval_requires_explicit_confirm(client, monkeypatch):
     monkeypatch.setattr("app.automation_api.approve_automation", fake_approve)
     response = client.post("/automations/3/approve", headers=HEADERS, json={"confirm": False})
     assert response.status_code == 422
-    assert "onay" in response.json()["detail"].lower()
+    assert "confirm" in response.json()["detail"].lower()

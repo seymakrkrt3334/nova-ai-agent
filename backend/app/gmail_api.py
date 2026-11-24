@@ -20,13 +20,13 @@ def _emails(query: str, limit: int):
     except ValueError:
         raise HTTPException(
             status_code=422,
-            detail="Arama doğrulanamadı.",
+            detail="The search could not be validated.",
         ) from None
     except Exception as exc:
-        logger.error("Gmail araması başarısız: %s", exc.__class__.__name__)
+        logger.error("The Gmail search failed: %s", exc.__class__.__name__)
         raise HTTPException(
             status_code=503,
-            detail="Gmail servisine erişilemedi.",
+            detail="The Gmail service could not be reached.",
         ) from None
 
 
@@ -51,10 +51,10 @@ def search(
     except AssertionError:
         raise
     except ValueError:
-        raise HTTPException(status_code=422, detail="Arama doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The search could not be validated.") from None
     except Exception as exc:
-        logger.error("Gmail araması başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Gmail servisine erişilemedi.") from None
+        logger.error("The Gmail search failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The Gmail service could not be reached.") from None
     return page
 
 
@@ -65,7 +65,7 @@ def message(message_id: str):
     except AssertionError:
         raise
     except ValueError:
-        raise HTTPException(status_code=422, detail="İleti doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The message could not be validated.") from None
     except Exception as exc:
-        logger.error("Gmail iletisi okunamadı: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Gmail servisine erişilemedi.") from None
+        logger.error("The Gmail message could not be read: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The Gmail service could not be reached.") from None

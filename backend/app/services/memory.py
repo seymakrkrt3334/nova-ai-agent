@@ -32,15 +32,15 @@ def database_url() -> str:
 
 def vector_string(embedding) -> str:
     if not isinstance(embedding, (list, tuple)) or len(embedding) != EMBEDDING_DIM:
-        raise ValueError("Geçersiz gömme vektörü.")
+        raise ValueError("Invalid embedding vector.")
 
     numbers: list[str] = []
     for value in embedding:
         if isinstance(value, bool) or not isinstance(value, (int, float)):
-            raise ValueError("Geçersiz gömme vektörü.")
+            raise ValueError("Invalid embedding vector.")
         number = float(value)
         if number != number or number in (float("inf"), float("-inf")):
-            raise ValueError("Geçersiz gömme vektörü.")
+            raise ValueError("Invalid embedding vector.")
         numbers.append(repr(number))
     return "[" + ",".join(numbers) + "]"
 
@@ -58,20 +58,20 @@ def _clean_text(value: str, limit: int, empty_message: str) -> str:
 
 def validate_memory(content: str, category: str) -> tuple[str, str]:
     return (
-        _clean_text(content, MAX_MEMORY_CHARS, "Geçersiz hafıza içeriği."),
-        _clean_text(category, MAX_CATEGORY_CHARS, "Geçersiz kategori."),
+        _clean_text(content, MAX_MEMORY_CHARS, "Invalid memory content."),
+        _clean_text(category, MAX_CATEGORY_CHARS, "Invalid category."),
     )
 
 
 def validate_search_query(query: str) -> str:
-    return _clean_text(query, 2000, "Geçersiz arama.")
+    return _clean_text(query, 2000, "Invalid search.")
 
 
 def validate_limit(limit: int, maximum: int) -> int:
     if isinstance(limit, bool) or not isinstance(limit, int):
-        raise ValueError("Geçersiz limit.")
+        raise ValueError("Invalid limit.")
     if limit < 1 or limit > maximum:
-        raise ValueError("Geçersiz limit.")
+        raise ValueError("Invalid limit.")
     return limit
 
 
@@ -94,7 +94,7 @@ async def _connection() -> AsyncIterator[psycopg.AsyncConnection]:
     try:
         connection = await psycopg.AsyncConnection.connect(url)
     except Exception:
-        logger.error("Hafıza veritabanına bağlanılamadı")
+        logger.error("Could not connect to the memory database")
         raise MemoryStoreError from None
     try:
         async with connection:
@@ -102,16 +102,16 @@ async def _connection() -> AsyncIterator[psycopg.AsyncConnection]:
     except MemoryStoreError:
         raise
     except Exception:
-        logger.error("Hafıza veritabanı işlemi başarısız")
+        logger.error("The memory database operation failed")
         raise MemoryStoreError from None
 
 
 def _distance_limit(max_distance: float | None) -> float:
     value = settings.memory_max_distance if max_distance is None else max_distance
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise ValueError("Geçersiz benzerlik eşiği.")
+        raise ValueError("Invalid similarity threshold.")
     if value <= 0 or value > 1.5:
-        raise ValueError("Geçersiz benzerlik eşiği.")
+        raise ValueError("Invalid similarity threshold.")
     return float(value)
 
 
@@ -123,7 +123,7 @@ async def save_memory(
 ):
     content, category = validate_memory(content, category)
     if durability not in {"long_term", "short_term"}:
-        raise ValueError("Geçersiz hafıza süresi.")
+        raise ValueError("Invalid memory lifetime.")
     if looks_personal(content) and not consent:
         raise ConsentRequired
     embedding = await get_embedding(content)
@@ -206,12 +206,12 @@ def format_memory_context(memories) -> str:
             lines.append(item.strip())
         elif isinstance(item, dict) and str(item.get("content") or "").strip():
             lines.append(str(item["content"]).strip())
-    return "\n".join(lines) if lines else "Henüz kayıt yok."
+    return "\n".join(lines) if lines else "No records yet."
 
 
 async def delete_memory(memory_id: int):
     if isinstance(memory_id, bool) or not isinstance(memory_id, int) or memory_id < 1:
-        raise ValueError("Geçersiz hafıza kaydı.")
+        raise ValueError("Invalid memory record.")
 
     async with _connection() as connection:
         async with connection.cursor() as cursor:
@@ -231,7 +231,7 @@ async def edit_memory(
     consent: bool = False,
 ):
     if isinstance(memory_id, bool) or not isinstance(memory_id, int) or memory_id < 1:
-        raise ValueError("Geçersiz hafıza kaydı.")
+        raise ValueError("Invalid memory record.")
     content, validated_category = validate_memory(content, category or "general")
     if looks_personal(content) and not consent:
         raise ConsentRequired
@@ -269,7 +269,7 @@ async def list_memories(limit: int = 100, category: str | None = None):
     params: list = []
     where = ""
     if category:
-        category = _clean_text(category, MAX_CATEGORY_CHARS, "Geçersiz kategori.")
+        category = _clean_text(category, MAX_CATEGORY_CHARS, "Invalid category.")
         where = "WHERE category = %s"
         params.append(category)
     params.append(limit)
@@ -302,8 +302,8 @@ async def list_memories(limit: int = 100, category: str | None = None):
 
 async def save_chat_message(role: str, content: str):
     if role not in {"user", "assistant", "system"}:
-        raise ValueError("Geçersiz rol.")
-    content = _clean_text(content, 100000, "Geçersiz mesaj.")
+        raise ValueError("Invalid role.")
+    content = _clean_text(content, 100000, "Invalid message.")
 
     session_id = current_session_id.get()
     async with _connection() as connection:

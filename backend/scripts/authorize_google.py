@@ -39,35 +39,35 @@ SERVICES = {
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="NOVA Google yetki adımları")
+    parser = argparse.ArgumentParser(description="NOVA Google authorization steps")
     parser.add_argument("service", choices=sorted(SERVICES))
-    parser.add_argument("--launch", action="store_true", help="Yerel tarayıcı akışını bilinçli olarak başlat")
+    parser.add_argument("--launch", action="store_true", help="Start the local browser flow on purpose")
     args = parser.parse_args()
     chosen = SERVICES[args.service]
     print(f"API: {chosen['api']}")
-    print("Kapsam:")
+    print("Scope:")
     for scope in chosen["scopes"]:
         print(f"  {scope}")
-    print(f"Konsol: {chosen['console']}")
-    print("1. Google Cloud projesinde yalnız bu API'yi etkinleştirin.")
-    print("2. OAuth istemci türü olarak Desktop app seçin.")
-    print("3. İndirilen dosyayı backend/credentials.json olarak koyun.")
-    print(f"4. Belirteç backend/{chosen['token']} dosyasına yazılır.")
-    print("Yazma kapsamı bu komutla istenmez. E-posta gönderme yoktur.")
+    print(f"Console: {chosen['console']}")
+    print("1. In the Google Cloud project, enable only this API.")
+    print("2. Choose Desktop app as the OAuth client type.")
+    print("3. Save the downloaded file as backend/credentials.json.")
+    print(f"4. The token is written to backend/{chosen['token']}.")
+    print("This command does not request a write scope. There is no email sending.")
     if not args.launch:
-        print("Tarayıcı açılmadı. Açmak için komutu --launch ile kendiniz çalıştırın.")
+        print("The browser was not opened. Run the command yourself with --launch to open it.")
         return 0
     from google_auth_oauthlib.flow import InstalledAppFlow
 
     credentials = BACKEND_DIR / "credentials.json"
     if not credentials.is_file():
-        print("credentials.json bulunamadı. Tarayıcı açılmadı.")
+        print("credentials.json was not found. The browser was not opened.")
         return 1
     flow = InstalledAppFlow.from_client_secrets_file(str(credentials), chosen["scopes"])
     creds = flow.run_local_server(port=0)
     token_path = BACKEND_DIR / chosen["token"]
     token_path.write_text(creds.to_json(), encoding="utf-8")
-    print("Yetki kaydedildi. Belirteç içeriği gösterilmedi.")
+    print("Authorization was saved. The token contents were not shown.")
     return 0
 
 

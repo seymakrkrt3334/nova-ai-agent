@@ -26,14 +26,14 @@ MAX_RESULTS = 50
 
 def normalize_search(query: str = "in:inbox", limit: int = 10) -> tuple[str, int]:
     if not isinstance(query, str):
-        raise ValueError("Geçersiz arama.")
+        raise ValueError("Invalid search.")
     normalized = " ".join(query.split())
     if not normalized or len(normalized) > MAX_QUERY_LENGTH:
-        raise ValueError("Geçersiz arama.")
+        raise ValueError("Invalid search.")
     if isinstance(limit, bool) or not isinstance(limit, int):
-        raise ValueError("Geçersiz limit.")
+        raise ValueError("Invalid limit.")
     if limit < 1 or limit > MAX_RESULTS:
-        raise ValueError("Geçersiz limit.")
+        raise ValueError("Invalid limit.")
     return normalized, limit
 
 
@@ -67,7 +67,7 @@ def valid_page_token(value: str | None) -> str | None:
         return None
     text = value.strip()
     if not PAGE_TOKEN_RE.fullmatch(text):
-        raise ValueError("Geçersiz sayfa.")
+        raise ValueError("Invalid page.")
     return text
 
 
@@ -235,7 +235,7 @@ def inbox_subjects(limit: int = 10) -> list[str]:
 
 def get_email(message_id: str) -> dict:
     if not isinstance(message_id, str) or not MESSAGE_ID_RE.fullmatch(message_id):
-        raise ValueError("Geçersiz ileti.")
+        raise ValueError("Invalid message.")
     service = get_gmail_service()
     message = service.users().messages().get(
         userId="me",

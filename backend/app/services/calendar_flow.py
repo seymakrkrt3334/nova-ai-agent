@@ -46,7 +46,7 @@ def confirmation_matches(message: str, code: str) -> bool:
 
 def propose_change(action: str, payload: dict, message: str = "") -> dict:
     if action not in {"create", "update", "delete"}:
-        raise ValueError("Geçersiz takvim işlemi.")
+        raise ValueError("Invalid calendar action.")
     clean = {
         "summary": " ".join(str(payload.get("summary") or "Etkinlik").split())[:180],
         "when": " ".join(str(payload.get("when") or "").split())[:120],

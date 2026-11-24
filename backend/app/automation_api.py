@@ -42,7 +42,7 @@ async def get_automations():
         return {"automations": await list_automations()}
     except Exception as exc:
         logger.error("Otomasyon listelenemedi: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
 
 
 @router.post("")
@@ -58,10 +58,10 @@ async def add_automation(request: AutomationRequest):
             request.authorize,
         )
     except ValueError:
-        raise HTTPException(status_code=422, detail="Otomasyon yetkisi doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The automation permission could not be validated.") from None
     except Exception as exc:
         logger.error("Otomasyon kaydedilemedi: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
 
 
 @router.get("/runs")
@@ -69,8 +69,8 @@ async def runs():
     try:
         return {"runs": await list_automation_runs()}
     except Exception as exc:
-        logger.error("Otomasyon geçmişi okunamadı: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        logger.error("Automation history could not be read: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
 
 
 @router.post("/tick")
@@ -78,8 +78,8 @@ async def tick():
     try:
         return {"notifications": await tick_automations()}
     except Exception as exc:
-        logger.error("Otomasyon kontrolü başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        logger.error("The automation check failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
 
 
 @router.post("/{automation_id}/status")
@@ -87,26 +87,26 @@ async def update_status(automation_id: int, request: StatusRequest):
     try:
         updated = await set_automation_status(automation_id, request.status)
     except ValueError:
-        raise HTTPException(status_code=422, detail="Otomasyon doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The automation could not be validated.") from None
     except Exception as exc:
-        logger.error("Otomasyon durumu değişmedi: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        logger.error("The automation status did not change: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
     if not updated:
-        raise HTTPException(status_code=404, detail="Otomasyon bulunamadı.")
+        raise HTTPException(status_code=404, detail="The automation was not found.")
     return {"status": request.status, "id": automation_id}
 
 
 @router.post("/{automation_id}/approve")
 async def approve(automation_id: int, request: ApprovalRequest):
     if not request.confirm:
-        raise HTTPException(status_code=422, detail="Çalıştırmak için açık onay gerekli.")
+        raise HTTPException(status_code=422, detail="Explicit confirmation is required before this can run.")
     try:
         approved = await approve_automation(automation_id)
     except Exception as exc:
-        logger.error("Otomasyon onayı başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        logger.error("Automation approval failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
     if approved is None:
-        raise HTTPException(status_code=404, detail="Onay bekleyen otomasyon bulunamadı.")
+        raise HTTPException(status_code=404, detail="No automation is waiting for confirmation.")
     return approved
 
 
@@ -115,10 +115,10 @@ async def revoke(automation_id: int):
     try:
         updated = await revoke_automation(automation_id)
     except Exception as exc:
-        logger.error("Otomasyon yetkisi kaldırılamadı: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        logger.error("The automation permission could not be revoked: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
     if not updated:
-        raise HTTPException(status_code=404, detail="Otomasyon bulunamadı.")
+        raise HTTPException(status_code=404, detail="The automation was not found.")
     return {"status": "revoked", "id": automation_id}
 
 
@@ -128,7 +128,7 @@ async def remove(automation_id: int):
         deleted = await delete_automation(automation_id)
     except Exception as exc:
         logger.error("Otomasyon silinemedi: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Otomasyon servisine erişilemedi.") from None
+        raise HTTPException(status_code=503, detail="The automation service could not be reached.") from None
     if not deleted:
-        raise HTTPException(status_code=404, detail="Otomasyon bulunamadı.")
+        raise HTTPException(status_code=404, detail="The automation was not found.")
     return {"status": "deleted", "id": automation_id}

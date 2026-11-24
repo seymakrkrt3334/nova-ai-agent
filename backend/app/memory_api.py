@@ -29,7 +29,7 @@ class MemoryRequest(BaseModel):
     def strip_value(cls, value: str) -> str:
         cleaned = value.strip()
         if not cleaned:
-            raise ValueError("boş olamaz")
+            raise ValueError("cannot be empty")
         return cleaned
 
 
@@ -42,7 +42,7 @@ class MemoryEdit(BaseModel):
     def strip_content(cls, value: str) -> str:
         cleaned = value.strip()
         if not cleaned:
-            raise ValueError("boş olamaz")
+            raise ValueError("cannot be empty")
         return cleaned
 
 
@@ -55,7 +55,7 @@ class MemorySearch(BaseModel):
     def strip_query(cls, value: str) -> str:
         cleaned = value.strip()
         if not cleaned:
-            raise ValueError("boş olamaz")
+            raise ValueError("cannot be empty")
         return cleaned
 
 
@@ -63,31 +63,31 @@ def _raise_memory_http(exc: Exception) -> None:
     if isinstance(exc, AssertionError):
         raise exc
     if isinstance(exc, LLMUnavailableError):
-        logger.error("Hafıza için yerel model kullanılamadı")
+        logger.error("The local model could not be used for memory")
         raise HTTPException(
             status_code=503,
-            detail="Yerel yapay zeka servisine erişilemedi.",
+            detail="The local AI service could not be reached.",
         ) from None
     if isinstance(exc, MemoryStoreError):
-        logger.error("Hafıza servisine ulaşılamadı")
+        logger.error("The memory service could not be reached")
         raise HTTPException(
             status_code=503,
-            detail="Hafıza servisine erişilemedi.",
+            detail="The memory service could not be reached.",
         ) from None
     if isinstance(exc, ConsentRequired):
         raise HTTPException(
             status_code=409,
-            detail="Kişisel bilgi için açık onay gerekli.",
+            detail="Explicit consent is required for personal information.",
         ) from None
     if isinstance(exc, ValueError):
         raise HTTPException(
             status_code=422,
-            detail="Hafıza kaydı doğrulanamadı.",
+            detail="The memory record could not be validated.",
         ) from None
-    logger.error("Hafıza isteği tamamlanamadı: %s", exc.__class__.__name__)
+    logger.error("The memory request could not be completed: %s", exc.__class__.__name__)
     raise HTTPException(
         status_code=500,
-        detail="İstek tamamlanamadı.",
+        detail="The request could not be completed.",
     ) from None
 
 
@@ -114,7 +114,7 @@ async def edit(memory_id: int, request: MemoryEdit):
     except Exception as exc:
         _raise_memory_http(exc)
     if not updated:
-        raise HTTPException(status_code=404, detail="Hafıza kaydı bulunamadı.")
+        raise HTTPException(status_code=404, detail="The memory record was not found.")
     return {"status": "updated", "id": memory_id}
 
 
@@ -129,7 +129,7 @@ async def history(
         else:
             selected = valid_session_id(session_id)
             if not selected:
-                raise HTTPException(status_code=422, detail="Oturum doğrulanamadı.")
+                raise HTTPException(status_code=422, detail="The session could not be validated.")
             messages = await get_chat_history(limit, selected)
     except HTTPException:
         raise
@@ -174,7 +174,7 @@ async def remove_memory(memory_id: int):
     if not deleted:
         raise HTTPException(
             status_code=404,
-            detail="Hafıza kaydı bulunamadı.",
+            detail="The memory record was not found.",
         )
 
     return {"status": "deleted", "id": memory_id}

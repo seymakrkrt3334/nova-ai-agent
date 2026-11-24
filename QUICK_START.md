@@ -1,28 +1,28 @@
-# NOVA hızlı başlangıç
+# NOVA quick start
 
-NOVA bu bilgisayarda kalır. PostgreSQL ve FastAPI genel ağa açılmaz.
+NOVA stays on this computer. PostgreSQL is not opened to the public network.
 
-## Başlatma
+## Start
 
-1. Ollama yerelde çalışıyor olsun. Model: `llama3.2` ve gömü modeli `nomic-embed-text`.
-2. `nova-vector-db` konteyneri duruyorsa `START_NOVA.bat` onu `docker start` ile açar. Hacmi yeniden oluşturmaz.
-3. `START_NOVA.bat` API'yi `127.0.0.1:8001` üzerinde, yalnız kapalıysa başlatır. `desktop\release\NOVA AI 1.0.0.exe` varsa onu açar. Paket yoksa geliştirme arayüzünü `127.0.0.1:5173` üzerinde açar.
-4. Sağlık kontrolü anahtarsız `401` görürse API ayaktadır. Bağlantı reddi başarısızlıktır.
-5. Arayüzde Ayarlar bölümüne API adresini ve `X-API-Key` değerini yazın. Anahtar sekme oturumunda kalır. Paket arayüzü `http://127.0.0.1:4173` adresindedir.
+1. Ollama should be running locally. Models: `llama3.2` and the embedding model `nomic-embed-text`.
+2. If the `nova-vector-db` container is stopped, `START_NOVA.bat` starts it with `docker start`. It does not recreate the volume.
+3. `START_NOVA.bat` starts the API on port `8001` only when it is not already up. If `desktop\release\NOVA AI 1.0.0.exe` exists, it opens that package. Otherwise it opens the development interface at `127.0.0.1:5173`.
+4. A health check that returns `401` without a key means the API is up. Connection refused is a failure.
+5. In Settings, enter the API address and the `X-API-Key`. The key stays in the tab session. The packaged interface is at `http://127.0.0.1:4173`.
 
-Durdurmak için `STOP_NOVA.bat`. Bu komut NOVA pencerelerini kapatır, veritabanı konteynerini ve hacmini silmez.
+Stop with `STOP_NOVA.bat`. That command closes NOVA windows. It does not delete the database container or its volume.
 
-Masaüstü kısayolu: `powershell -ExecutionPolicy Bypass -File scripts\create_shortcut.ps1`
+Desktop shortcut: `powershell -ExecutionPolicy Bypass -File scripts\create_shortcut.ps1`
 
-## Günlük kullanım
+## Daily use
 
-- Sohbet geçmişi oturum kimliğiyle saklanır. Kalıcı hafıza oturumlar arasında aranır.
-- Gmail, kişiler ve takvim için `backend` klasöründe `python scripts/authorize_google.py gmail` komutu adımları yazar. `--launch` vermeden tarayıcı açılmaz.
-- Ses için basılı tutun. Bırakınca WAV kaydı yerel Whisper'a gider. İptal, kaydı ve sesi durdurur. Sürekli dinleme yoktur.
-- Çok dilli taban model kuruludur. İngilizce örnek ses canlı çevrildi. Türkçe bir kayıt henüz canlı denenmedi. Windows'ta yalnız İngilizce SAPI sesleri vardır; Türkçe ses paketi kurulmadı.
+- Chat history is stored with a session id. Long-term memory is searched across sessions.
+- For Gmail, contacts, and calendar, `python scripts/authorize_google.py gmail` from the `backend` folder prints the steps. The browser does not open unless you pass `--launch`.
+- Hold the microphone button to talk. Releasing it sends a WAV recording to local Whisper. Cancel stops the recording and speech. There is no continuous listening.
+- The interface language defaults to English. Replies follow the language of the message.
 
-## Telefon
+## Phone
 
-`mobile` içinde bağımlılıklar kurulu ve tür denetimi geçti. API adresi ve anahtar SecureStore'dadır. Telefon mikrofonu m4a üretir; yerel tanıma bunu kabul etmez. Cevabı seslendirmek Expo Speech ile çalışır.
+Dependencies are installed in `mobile` and the type check passed. The API address and key are in SecureStore. The phone records M4A; local FFmpeg converts it before recognition. Spoken replies use Expo Speech.
 
-Fiziksel telefon `127.0.0.1` adresine ulaşamaz. Tailscale bu bilgisayarda kurulu değildir. Kurmak sizin kararınızdır. PostgreSQL `127.0.0.1:5434` üzerinde kalır ve tailnet'e açılmaz. Ayrıntı `SECURITY.md` ve `MANUAL_TESTS.md` içindedir.
+A physical phone cannot reach `127.0.0.1`. Use the Tailscale address of this computer in the phone settings. PostgreSQL stays on `127.0.0.1:5434` and is not opened to the tailnet. Details are in `SECURITY.md` and `MANUAL_TESTS.md`.

@@ -12,7 +12,7 @@ export type Lang = "tr" | "en";
 export function loadPreferences() {
   const apiUrl = localStorage.getItem(URL_KEY) || "http://127.0.0.1:8001";
   const theme = (localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark") as Theme;
-  const lang = (localStorage.getItem(LANG_KEY) === "en" ? "en" : "tr") as Lang;
+  const lang = (localStorage.getItem(LANG_KEY) === "tr" ? "tr" : "en") as Lang;
   const speak = localStorage.getItem(SPEAK_KEY) === "1";
   const apiKey = sessionStorage.getItem(KEY_KEY) || "";
   return { apiUrl, apiKey, theme, lang, speak };
@@ -36,7 +36,7 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(connection: Connection, path: string, init: RequestInit = {}): Promise<T> {
-  if (!connection.apiKey) throw new ApiError(401, "API anahtarı gerekli.");
+  if (!connection.apiKey) throw new ApiError(401, "An API key is required.");
   const headers = new Headers(init.headers);
   if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -46,7 +46,7 @@ export async function api<T>(connection: Connection, path: string, init: Request
   try {
     response = await fetch(`${connection.apiUrl}${path}`, { ...init, headers });
   } catch {
-    throw new ApiError(0, "Bağlantı kurulamadı.");
+    throw new ApiError(0, "The connection could not be established.");
   }
   if (!response.ok) {
     let detail = `HTTP ${response.status}`;

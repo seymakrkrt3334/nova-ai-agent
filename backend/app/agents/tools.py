@@ -114,57 +114,57 @@ class ToolCall:
 REGISTRY: dict[str, ToolSpec] = {
     "chat": ToolSpec(
         name="chat",
-        description="Genel sorular ve normal sohbet",
+        description="General questions and ordinary chat",
         argument_model=ChatArguments,
     ),
     "gmail_search": ToolSpec(
         name="gmail_search",
-        description="Kullanıcının kendi e-postalarını arama veya özetleme",
+        description="Search or summarize the user's own email",
         argument_model=GmailSearchArguments,
     ),
     "memory_search": ToolSpec(
         name="memory_search",
-        description="Kayıtlı kişisel hafızayı arama",
+        description="Search saved personal memory",
         argument_model=MemorySearchArguments,
     ),
     "memory_save": ToolSpec(
         name="memory_save",
-        description="Kullanıcının açıkça istediği kalıcı hafıza kaydı",
+        description="A durable memory record the user explicitly requested",
         argument_model=MemorySaveArguments,
     ),
     "gmail_read": ToolSpec(
         name="gmail_read",
-        description="İstenen e-postanın tam metnini salt okunur getirir",
+        description="Fetch the full text of a requested email, read-only",
         argument_model=GmailReadArguments,
     ),
     "gmail_draft": ToolSpec(
         name="gmail_draft",
-        description="E-posta göndermeden yanıt taslağı yazar",
+        description="Write a reply draft without sending email",
         argument_model=GmailDraftArguments,
     ),
     "web_search": ToolSpec(
         name="web_search",
-        description="Güncel bilgi için kaynaklı web araması yapar",
+        description="Search the web with sources for current information",
         argument_model=WebSearchArguments,
     ),
     "web_read": ToolSpec(
         name="web_read",
-        description="Kullanıcının andığı herkese açık sayfayı okur",
+        description="Read the public page the user named",
         argument_model=WebReadArguments,
     ),
     "contacts_search": ToolSpec(
         name="contacts_search",
-        description="Google kişilerini listeler veya arar",
+        description="List or search Google contacts",
         argument_model=ContactsSearchArguments,
     ),
     "calendar_list": ToolSpec(
         name="calendar_list",
-        description="Yaklaşan takvim etkinliklerini listeler",
+        description="List upcoming calendar events",
         argument_model=CalendarListArguments,
     ),
     "calendar_propose": ToolSpec(
         name="calendar_propose",
-        description="Takvim değişikliğini onay koduyla önerir",
+        description="Propose a calendar change with a confirmation code",
         argument_model=CalendarProposeArguments,
     ),
 }

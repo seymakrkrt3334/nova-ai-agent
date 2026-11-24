@@ -33,7 +33,7 @@ async def _automation_loop(stop: asyncio.Event) -> None:
         try:
             await tick_automations()
         except Exception as exc:
-            logger.error("Otomasyon döngüsü tamamlanamadı: %s", exc.__class__.__name__)
+            logger.error("The automation loop could not be completed: %s", exc.__class__.__name__)
 
 
 @asynccontextmanager
@@ -98,22 +98,22 @@ async def chat(payload: ChatRequest):
             history=history,
         )
     except LLMUnavailableError:
-        logger.error("Yerel model servisine ulaşılamadı")
+        logger.error("The local model service could not be reached")
         raise HTTPException(
             status_code=503,
-            detail="Yerel yapay zeka servisine erişilemedi.",
+            detail="The local AI service could not be reached.",
         ) from None
     except MemoryStoreError:
-        logger.error("Hafıza servisine ulaşılamadı")
+        logger.error("The memory service could not be reached")
         raise HTTPException(
             status_code=503,
-            detail="Hafıza servisine erişilemedi.",
+            detail="The memory service could not be reached.",
         ) from None
     except Exception as exc:
-        logger.error("NOVA sohbet isteği tamamlanamadı: %s", exc.__class__.__name__)
+        logger.error("The NOVA chat request could not be completed: %s", exc.__class__.__name__)
         raise HTTPException(
             status_code=500,
-            detail="İstek tamamlanamadı.",
+            detail="The request could not be completed.",
         ) from None
     finally:
         current_session_id.reset(session)

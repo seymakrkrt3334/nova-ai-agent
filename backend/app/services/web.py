@@ -40,7 +40,7 @@ def _clip(value: str, limit: int) -> str:
 def provider_request(query: str) -> tuple[str, str] | None:
     cleaned = " ".join(query.split())
     if not cleaned or len(cleaned) > MAX_QUERY_CHARS:
-        raise ValueError("Geçersiz arama.")
+        raise ValueError("Invalid search.")
     provider = (settings.web_search_provider or "disabled").strip().lower()
     if provider in {"", "disabled", "off"}:
         return None

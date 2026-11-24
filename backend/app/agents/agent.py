@@ -186,7 +186,7 @@ async def _finish(message: str, reply: str, record_exchange) -> str:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Konuşma kaydı yazılamadı")
+            logger.error("The conversation record could not be written")
     return reply
 
 
@@ -240,7 +240,7 @@ async def run_agent(
         except AssertionError:
             raise
         except Exception:
-            logger.error("Takvim onayı uygulanamadı")
+            logger.error("The calendar confirmation could not be applied")
             return await _finish(message, phrase("calendar_failed", text, history), record_exchange)
         reply = result.get("message") if isinstance(result, dict) else phrase("calendar_failed", text, history)
         return await _finish(message, reply, record_exchange)
@@ -255,7 +255,7 @@ async def run_agent(
         except (LLMUnavailableError, AssertionError):
             raise
         except Exception:
-            logger.error("Hafıza kaydı başarısız")
+            logger.error("The memory save failed")
             return phrase("memory_error", text, history)
         return await _finish(message, phrase("saved", text, history), record_exchange)
 
@@ -266,7 +266,7 @@ async def run_agent(
         except (LLMUnavailableError, AssertionError):
             raise
         except Exception:
-            logger.error("Araç yönlendirmesi başarısız")
+            logger.error("Tool routing failed")
             break
 
         call = parse_tool_call(raw)
@@ -284,7 +284,7 @@ async def run_agent(
             except AssertionError:
                 raise
             except Exception:
-                logger.error("Gmail aracı başarısız")
+                logger.error("The Gmail tool failed")
                 return await _finish(message, phrase("gmail_error", text, history), record_exchange)
             if not emails:
                 return await _finish(message, phrase("gmail_empty", text, history), record_exchange)
@@ -308,7 +308,7 @@ async def run_agent(
             except (LLMUnavailableError, AssertionError):
                 raise
             except Exception:
-                logger.error("Hafıza aracı başarısız")
+                logger.error("The memory tool failed")
                 observations.append({
                     "tool": "memory_search",
                     "ok": False,
@@ -356,7 +356,7 @@ async def run_agent(
         except (LLMUnavailableError, AssertionError):
             raise
         except Exception:
-            logger.error("Araç sonucu özetlenemedi")
+            logger.error("The tool result could not be summarized")
             reply = phrase("summary_failed", message, history)
         return await _finish(message, reply, record_exchange)
     return await reply_fn(message)
@@ -374,7 +374,7 @@ async def _run_extra_tool(call, message: str, **handlers) -> dict | None:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Gmail okuma aracı başarısız")
+            logger.error("The Gmail read tool failed")
             return {"tool": "gmail_read", "ok": False, "count": 0, "message": phrase("gmail_read_error", message)}
         return {"tool": "gmail_read", "ok": True, "emails": [email], "count": 1}
 
@@ -397,7 +397,7 @@ async def _run_extra_tool(call, message: str, **handlers) -> dict | None:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Web aracı başarısız")
+            logger.error("The web tool failed")
             return {"tool": "web_search", "ok": False, "count": 0}
         return {"tool": "web_search", "ok": True, "results": results or [], "count": len(results or [])}
 
@@ -414,7 +414,7 @@ async def _run_extra_tool(call, message: str, **handlers) -> dict | None:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Sayfa okuma aracı başarısız")
+            logger.error("The page read tool failed")
             return {"tool": "web_read", "ok": False, "count": 0}
         return {"tool": "web_read", "ok": True, "pages": [page], "count": 1}
 
@@ -433,7 +433,7 @@ async def _run_extra_tool(call, message: str, **handlers) -> dict | None:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Kişi aracı başarısız")
+            logger.error("The contacts tool failed")
             return {"tool": "contacts_search", "ok": False, "count": 0}
         return {"tool": "contacts_search", "ok": True, "items": items or [], "count": len(items or [])}
 
@@ -454,7 +454,7 @@ async def _run_extra_tool(call, message: str, **handlers) -> dict | None:
         except AssertionError:
             raise
         except Exception:
-            logger.error("Takvim aracı başarısız")
+            logger.error("The calendar tool failed")
             return {"tool": "calendar_list", "ok": False, "count": 0}
         return {"tool": "calendar_list", "ok": True, "items": items or [], "count": len(items or [])}
 

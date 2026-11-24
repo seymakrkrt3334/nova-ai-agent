@@ -66,7 +66,7 @@ async def create_automation(
 
 async def set_automation_status(automation_id: int, status: str):
     if status not in {"active", "paused"}:
-        raise ValueError("Geçersiz durum.")
+        raise ValueError("Invalid status.")
     async with _connection() as connection:
         async with connection.cursor() as cursor:
             await cursor.execute(
@@ -132,7 +132,7 @@ async def tick_automations(readers: dict | None = None):
                     try:
                         summary = run_readonly_job(job, readers)
                     except Exception:
-                        summary = "Salt okunur iş tamamlanamadı."
+                        summary = "The read-only job could not be completed."
                     await cursor.execute(
                         """
                         INSERT INTO automation_runs (automation_id, window_key, status, summary)

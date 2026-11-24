@@ -72,7 +72,7 @@ def test_chat_errors_do_not_leak_exception_text(client, monkeypatch):
     monkeypatch.setattr("app.main.run_agent", unavailable)
     response = client.post("/chat", headers=HEADERS, json={"message": "ping"})
     assert response.status_code == 503
-    assert response.json()["detail"] == "Yerel yapay zeka servisine erişilemedi."
+    assert response.json()["detail"] == "The local AI service could not be reached."
     assert "local-model-detail" not in response.text
 
     async def memory_down(message, **kwargs):
@@ -81,7 +81,7 @@ def test_chat_errors_do_not_leak_exception_text(client, monkeypatch):
     monkeypatch.setattr("app.main.run_agent", memory_down)
     response = client.post("/chat", headers=HEADERS, json={"message": "ping"})
     assert response.status_code == 503
-    assert response.json()["detail"] == "Hafıza servisine erişilemedi."
+    assert response.json()["detail"] == "The memory service could not be reached."
     assert "database-detail" not in response.text
 
     async def unexpected(message, **kwargs):
@@ -90,7 +90,7 @@ def test_chat_errors_do_not_leak_exception_text(client, monkeypatch):
     monkeypatch.setattr("app.main.run_agent", unexpected)
     response = client.post("/chat", headers=HEADERS, json={"message": "ping"})
     assert response.status_code == 500
-    assert response.json()["detail"] == "İstek tamamlanamadı."
+    assert response.json()["detail"] == "The request could not be completed."
     assert "secret-trace" not in response.text
 
 
@@ -127,7 +127,7 @@ def test_gmail_routes_use_mock_and_hide_failures(client, monkeypatch):
     monkeypatch.setattr("app.gmail_api.search_emails", explode)
     failed = client.get("/gmail/unread", headers=HEADERS)
     assert failed.status_code == 503
-    assert failed.json()["detail"] == "Gmail servisine erişilemedi."
+    assert failed.json()["detail"] == "The Gmail service could not be reached."
     assert "super-secret" not in failed.text
 
 
@@ -198,4 +198,4 @@ def test_memory_routes_do_not_touch_live_store(client, monkeypatch):
     monkeypatch.setattr("app.memory_api.delete_memory", not_deleted)
     deleted = client.delete("/memory/2147483647", headers=HEADERS)
     assert deleted.status_code == 404
-    assert deleted.json()["detail"] == "Hafıza kaydı bulunamadı."
+    assert deleted.json()["detail"] == "The memory record was not found."

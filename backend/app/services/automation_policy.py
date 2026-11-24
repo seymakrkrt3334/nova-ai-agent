@@ -21,9 +21,9 @@ def execution_plan(job: dict) -> str:
 
 def validate_schedule(scope: str, access_grant: str, auto_execute: bool, authorize: bool) -> None:
     if scope not in {"manual", *READONLY_ACCESS}:
-        raise ValueError("Geçersiz otomasyon kapsamı.")
+        raise ValueError("Invalid automation scope.")
     if access_grant not in {"none", *READONLY_ACCESS.values()}:
-        raise ValueError("Geçersiz erişim izni.")
+        raise ValueError("Invalid access permission.")
     if not auto_execute:
         return
     if not authorize or execution_plan({
@@ -32,7 +32,7 @@ def validate_schedule(scope: str, access_grant: str, auto_execute: bool, authori
         "auto_execute": True,
         "authorized": True,
     }) != "run":
-        raise ValueError("Otomatik çalıştırma yalnız açık yetkili salt okunur kapsamda geçerlidir.")
+        raise ValueError("Automatic execution is allowed only for an explicitly authorized read-only scope.")
 
 
 def window_key(job: dict) -> str:
@@ -43,7 +43,7 @@ def window_key(job: dict) -> str:
 
 def run_readonly_job(job: dict, readers: dict | None = None) -> str:
     if execution_plan(job) != "run":
-        raise PermissionError("Bu iş otomatik çalışamaz.")
+        raise PermissionError("This job cannot run automatically.")
     readers = readers or {}
     scope = job["scope"]
     sample = f"{job.get('prompt') or ''} {job.get('name') or ''}"
@@ -74,4 +74,4 @@ def run_readonly_job(job: dict, readers: dict | None = None) -> str:
             return automation_line(sample, "Web araştırması için sağlayıcı bağlı değil.", "No web provider is connected for research.")
         sources = "source" if len(results) == 1 else "sources"
         return automation_line(sample, f"Web araştırması: {len(results)} kaynak.", f"Web research: {len(results)} {sources}.")
-    raise PermissionError("Yazma işlemi otomatik çalışamaz.")
+    raise PermissionError("A write cannot run automatically.")

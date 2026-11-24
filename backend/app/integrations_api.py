@@ -45,7 +45,7 @@ def integration_status():
         "voice": {
             "ready": voice_ready(),
             "continuous_listening": False,
-            "setup": "VOICE_STT_PROVIDER=whisper ve yerel VOICE_STT_COMMAND. Model dosyası otomatik inmez.",
+            "setup": "VOICE_STT_PROVIDER=whisper and a local VOICE_STT_COMMAND. The model file is not downloaded automatically.",
         },
         "social": social_status(),
     }
@@ -73,8 +73,8 @@ def contacts(
     except AuthorizationRequired:
         raise HTTPException(status_code=403, detail="Google Contacts izni gerekli.") from None
     except Exception as exc:
-        logger.error("Kişiler isteği başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Kişiler servisine erişilemedi.") from None
+        logger.error("The contacts request failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The contacts service could not be reached.") from None
 
 
 @router.get("/calendar/upcoming")
@@ -84,8 +84,8 @@ def upcoming(days: int = Query(7, ge=1, le=7)):
     except AuthorizationRequired:
         raise HTTPException(status_code=403, detail="Google Calendar izni gerekli.") from None
     except Exception as exc:
-        logger.error("Takvim isteği başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Takvim servisine erişilemedi.") from None
+        logger.error("The calendar request failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The calendar service could not be reached.") from None
 
 
 @router.post("/calendar/propose")
@@ -93,7 +93,7 @@ def propose(proposal: CalendarProposal):
     try:
         return propose_change(proposal.action, proposal.model_dump())
     except ValueError:
-        raise HTTPException(status_code=422, detail="Takvim işlemi doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The calendar action could not be validated.") from None
 
 
 @router.post("/calendar/confirm")
@@ -106,7 +106,7 @@ async def web_search(q: str = Query(min_length=1, max_length=300)):
     try:
         return {"results": await search_web(q)}
     except ValueError:
-        raise HTTPException(status_code=422, detail="Arama doğrulanamadı.") from None
+        raise HTTPException(status_code=422, detail="The search could not be validated.") from None
     except Exception as exc:
-        logger.error("Web araması başarısız: %s", exc.__class__.__name__)
-        raise HTTPException(status_code=503, detail="Web araması tamamlanamadı.") from None
+        logger.error("The web search failed: %s", exc.__class__.__name__)
+        raise HTTPException(status_code=503, detail="The web search could not be completed.") from None
