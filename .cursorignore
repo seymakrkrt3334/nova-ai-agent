@@ -1,0 +1,10 @@
+**/.env
+**/.env.*
+**/credentials.json
+**/token.json
+**/client_secret*.json
+**/*.dump
+**/*.pem
+**/*.key
+**/.venv/
+**/node_modules/

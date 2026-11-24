@@ -1,0 +1,19 @@
+
+# Local Postgres 16 without pgvector. Do not remove the named volume.
+# Semantic memory uses the separate local pgvector database and its own volume.
+services:
+  postgres:
+    image: postgres:16
+    container_name: nova-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_local_dev_only
+      POSTGRES_DB: nova_memory
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - nova_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  nova_postgres_data:

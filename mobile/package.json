@@ -1,0 +1,26 @@
+{
+  "name": "nova-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "dependencies": {
+    "expo": "~52.0.28",
+    "expo-asset": "~11.0.5",
+    "expo-av": "~15.0.2",
+    "expo-secure-store": "~14.0.1",
+    "expo-speech": "~13.0.1",
+    "expo-status-bar": "~2.0.1",
+    "nova-assistant": "file:./modules/nova-assistant",
+    "react": "18.3.1",
+    "react-native": "0.76.6"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "typescript": "~5.6.3"
+  }
+}

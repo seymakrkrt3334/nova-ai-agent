@@ -1,0 +1,24 @@
+
+# Local-only definition. Do not recreate a running database from this file.
+# The published port stays on localhost.
+services:
+  nova-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: nova-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_local_dev_password
+      POSTGRES_DB: nova_memory
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - nova_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nova -d nova_memory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  nova_postgres_data:
